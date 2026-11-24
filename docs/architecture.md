@@ -97,3 +97,29 @@ the lanes take, from structurisation), and accessed with a non-uniform heap
 index in one pass. `victory translate`
 runs every shader it finds (containers, SGD5 files) through these and
 lists what they cannot handle yet.
+
+[DXIL emission](../crates/victory-shader/src/emit/mod.rs) documents how
+translated shaders receive resources and when the host GPU must support a
+particular wave size (the number of lanes that execute together). The
+[shader cache](../crates/victory-gpu/src/shader_cache.rs) keys saved
+translations by the shader contents, the VIctory build, and the
+configured shader loop limit.
+
+## Host GPU
+
+[Queue submission](../crates/victory-gpu/src/queue.rs) hands command lists
+to the [host GPU](../crates/victory-gpu/src/host.rs). The host normally
+waits for completion and logs a warning if it cannot set up the wait.
+[Pipeline workers](../crates/victory-gpu/src/pipeline/make.rs)
+prepare pipelines in the background. If a pipeline is still unavailable
+after the frame's wait budget, the draw or dispatch is skipped.
+
+[Buffer copies](../crates/victory-gpu/src/shadow.rs) and
+[texture uploads](../crates/victory-gpu/src/texture.rs) explain how VIctory
+updates the data the host GPU reads, and which reads it can track.
+
+## Presentation
+
+VIctory presents in standard dynamic range (SDR). The
+[display API](../crates/victory-hle/src/modules/display.rs) reports HDR as
+disabled. HDR output requires a host swap chain that can present it.
